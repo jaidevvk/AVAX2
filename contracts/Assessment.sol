@@ -1,121 +1,35 @@
-import {useState, useEffect} from "react";
-import {ethers} from "ethers";
-import atm_abi from "../artifacts/contracts/Assessment.sol/Assessment.json";
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.9;
 
-export default function HomePage() {
-  const [ethWallet, setEthWallet] = useState(undefined);
-  const [account, setAccount] = useState(undefined);
-  const [atm, setATM] = useState(undefined);
-  const [balance, setBalance] = useState(undefined);
+//import "hardhat/console.sol";
 
-  const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-  const atmABI = atm_abi.abi;
-
-  const getWallet = async() => {
-    if (window.ethereum) {
-      setEthWallet(window.ethereum);
-    }
-
-    if (ethWallet) {
-      const account = await ethWallet.request({method: "eth_accounts"});
-      handleAccount(account);
-    }
-  }
-
-  const handleAccount = (account) => {
-    if (account) {
-      console.log ("Account connected: ", account);
-      setAccount(account);
-    }
-    else {
-      console.log("No account found");
-    }
-  }
-
-  const connectAccount = async() => {
-    if (!ethWallet) {
-      alert('MetaMask wallet is required to connect');
-      return;
-    }
-  
-    const accounts = await ethWallet.request({ method: 'eth_requestAccounts' });
-    handleAccount(accounts);
+contract Assessment {
     
-    // once wallet is set we can get a reference to our deployed contract
-    getATMContract();
-  };
+    uint256 public balance;
 
-  const getATMContract = () => {
-    const provider = new ethers.providers.Web3Provider(ethWallet);
-    const signer = provider.getSigner();
-    const atmContract = new ethers.Contract(contractAddress, atmABI, signer);
- 
-    setATM(atmContract);
-  }
 
-  const getBalance = async() => {
-    if (atm) {
-      setBalance((await atm.getBalance()).toNumber());
-    }
-  }
-
-  const arithmetic = async() => {
-    if (atm) {
-      let tx = await atm.arithmeticSum(5,4,5);
-      await tx.wait()
-      getBalance();
-    }
-  }
-
-  const power = async() => {
-    if (atm) {
-      let tx = await atm.powerSeries(5,3);
-      await tx.wait()
-      getBalance();
-    }
-  }
-
-  const initUser = () => {
-    // Check to see if user has Metamask
-    if (!ethWallet) {
-      return <p>Please install Metamask in order to use this ATM.</p>
+    constructor(uint initBalance) payable {
+        balance = initBalance;
     }
 
-    // Check to see if user is connected. If not, connect to their account
-    if (!account) {
-      return <button onClick={connectAccount}>Please connect your Metamask wallet</button>
+    function getBalance() public view returns(uint256){
+        return balance;
     }
 
-    if (balance == undefined) {
-      getBalance();
+    function arithmeticSum(uint256 a, uint256 d, uint256 n) public payable {
+        
+        uint256 sum = (n * (2 * a + (n - 1) * d)) / 2;
+
+        balance=sum;
     }
 
-    return (
-      <div>
-        <p>Your Account: {account}</p>
-        <p>Result: {balance}</p>
-        <button onClick={arithmetic}>Sum of Arithmetic Series</button>
-        <button onClick={power}>Sum of Power Series</button>
-      </div>
-    )
-  }
-
-  useEffect(() => {getWallet();}, []);
-
-  return (
-    <main className="container">
-      <header><h1><u><i>Find the Sum of Arithmetic Series and the Power Series</i></u></h1></header>
-      {initUser()}
-      <style jsx>{`
-        .container {
-          text-align: center;
-          
+    function powerSeries(uint256 n, uint256 x) public {
+        uint256 sum = 0;
+        uint256 term = 1;
+        for (uint256 i = 0; i < n; i++) {
+            sum += term;
+            term *= x;
         }
-        *{
-          background-color:lightblue;
-        }
-      `}
-      </style>
-    </main>
-  )
+        balance=sum;
+    }
 }
