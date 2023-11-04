@@ -59,17 +59,17 @@ export default function HomePage() {
     }
   }
 
-  const deposit = async() => {
+  const arithmetic = async() => {
     if (atm) {
-      let tx = await atm.deposit(1);
+      let tx = await atm.arithmeticSum(5,4,5);
       await tx.wait()
       getBalance();
     }
   }
 
-  const withdraw = async() => {
+  const power = async() => {
     if (atm) {
-      let tx = await atm.withdraw(1);
+      let tx = await atm.powerSeries(5,3);
       await tx.wait()
       getBalance();
     }
@@ -93,9 +93,9 @@ export default function HomePage() {
     return (
       <div>
         <p>Your Account: {account}</p>
-        <p>Your Balance: {balance}</p>
-        <button onClick={deposit}>Deposit 1 ETH</button>
-        <button onClick={withdraw}>Withdraw 1 ETH</button>
+        <p>Result: {balance}</p>
+        <button onClick={arithmetic}>Sum of Arithmetic Series</button>
+        <button onClick={power}>Sum of Power Series</button>
       </div>
     )
   }
@@ -104,11 +104,15 @@ export default function HomePage() {
 
   return (
     <main className="container">
-      <header><h1>Welcome to the Metacrafters ATM!</h1></header>
+      <header><h1><u><i>Find the Sum of Arithmetic Series and the Power Series</i></u></h1></header>
       {initUser()}
       <style jsx>{`
         .container {
-          text-align: center
+          text-align: center;
+          
+        }
+        *{
+          background-color:lightblue;
         }
       `}
       </style>
